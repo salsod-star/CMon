@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,7 +10,23 @@ import (
 )
 
 func (app *application) createContributionHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "create a new contribution")
+	var newContribution struct {
+		Amount      int       `json:"amount"`
+		Outstanding int       `json:"outstanding"`
+		LastPaid    time.Time `json:"last_paid"`
+		Frequency   string    `json:"frequency"`
+		Status      string    `json:"status"`
+		Notes       string    `json:"notes"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&newContribution)
+
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", newContribution)
 }
 
 func (app *application) showContributionHandler(w http.ResponseWriter, r *http.Request) {
