@@ -50,3 +50,7 @@ func main() {
 	err := srv.ListenAndServe()
 	app.logger.Fatal(err)
 }
+
+// func openDB() sql {
+
+// }

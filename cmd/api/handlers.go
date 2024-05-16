@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
+
+	"cmon.salsod.dev/internal/models"
 )
 
 func (app *application) createContributionHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,10 +16,24 @@ func (app *application) showContributionHandler(w http.ResponseWriter, r *http.R
 	id, err := app.readIDParam(r)
 
 	if err != nil || id < 1 {
-		app.logger.Println(err)
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 
-	fmt.Fprintf(w, "show the details of the contribution for entry %d", id)
+	contribution := models.Contribution{
+		ID:          uint64(id),
+		Amount:      1400,
+		Outstanding: 0,
+		LastPaid:    time.Now(),
+		Frequency:   "weekly",
+		Status:      "paid",
+		Notes:       "none",
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"contribution": contribution}, nil)
+
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 }
