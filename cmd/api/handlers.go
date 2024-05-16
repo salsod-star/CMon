@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"cmon.salsod.dev/internal/models"
+	"cmon.salsod.dev/internal/validator"
 )
 
 func (app *application) createContributionHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,10 +19,28 @@ func (app *application) createContributionHandler(w http.ResponseWriter, r *http
 		Notes       string    `json:"notes"`
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&newContribution)
+	err := app.readJSON(w, r, &newContribution)
 
 	if err != nil {
-		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	contrib := &models.Contribution{
+		Amount:      newContribution.Amount,
+		Outstanding: newContribution.Outstanding,
+		LastPaid:    newContribution.LastPaid,
+		Frequency:   newContribution.Frequency,
+		Status:      newContribution.Status,
+		Notes:       newContribution.Notes,
+	}
+
+	v := validator.New()
+
+	models.ValidateContribution(v, contrib)
+
+	if !v.Valid() {
+		app.failedValidationErrorResponse(w, r, err)
 		return
 	}
 

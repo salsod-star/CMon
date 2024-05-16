@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"cmon.salsod.dev/internal/validator"
+)
 
 type Contribution struct {
 	ID          uint64    `json:"id"`
@@ -24,3 +28,9 @@ type Contribution struct {
 // PaymentReferenceNumber
 // LastUpdateDate
 // Notes
+
+func ValidateContribution(v *validator.Validator, c *Contribution) {
+
+	v.Check(c.Amount >= 0, "amount", "must be a positive integer")
+	v.Check(c.LastPaid.Before(time.Now()), "lastPaid", "")
+}
