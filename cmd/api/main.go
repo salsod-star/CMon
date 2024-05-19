@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"cmon.salsod.dev/internal/models"
 	_ "github.com/lib/pq"
 )
 
@@ -29,6 +30,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	models models.Models
 }
 
 func main() {
@@ -61,6 +63,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: models.NewModels(db),
 	}
 
 	srv := &http.Server{
